@@ -137,6 +137,7 @@ local GetCurrentMode = function()
 		isTrivial, frequency, isRepeatable, isLegendary = GetAvailableQuestInfo(questNum + currentqid)
 	elseif currentqm == 3 then
 		local qs = {GetGossipActiveQuests()}
+		--print(unpack(qs))
 		isTrivial = qs[(index-1) * 5 + 3]
 		frequency = glob_sqt.repeatable[qs[(index-1) * 5 + 1]]
 		--isRepeatable = qs[(index-1) * 5 + 1]
@@ -153,11 +154,12 @@ local GetCurrentMode = function()
 		end
 	elseif currentqm == 2 then
 		local qs = {GetGossipAvailableQuests()}
-		isTrivial = qs[(index-1) * 5 + 3]
-		frequency = qs[(index-1) * 5 + 4]
-		isRepeatable = qs[(index-1) * 5 + 5]
-		isLegendary = qs[(index-1) * 5 + 6]
-		glob_sqt.repeatable[qs[(index-1) * 5 + 1]] = frequency
+	--	print(unpack(qs))
+		isTrivial = qs[(index-1) * 6 + 3]
+		frequency = qs[(index-1) * 6 + 4]
+		isRepeatable = qs[(index-1) * 6 + 5]
+		isLegendary = qs[(index-1) * 6 + 6]
+		glob_sqt.repeatable[qs[(index-1) * 6 + 1]] = frequency
 	end
 	if isLegendary then
 		current_mode = glob_sqt.legendary.mode
@@ -307,8 +309,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		if glob_sqt.daily == nil then
 			glob_sqt.daily = { mode = 2 }
 		end
-		if glob_sqt.repeatable == nil then
+		if glob_sqt.repeatable == nil or glob_sqt.configver ~= 1 then
 			glob_sqt.repeatable = {}
+			glob_sqt.configver = 1
 		end
 		if glob_sqt.legendary.mode == 0 then
 			config_frame.btn1:SetTextColor(1, 0.8, 0, 1)
