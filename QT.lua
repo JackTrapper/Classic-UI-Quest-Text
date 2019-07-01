@@ -188,6 +188,7 @@ local fupd = function(self, arg)
 				--	OnUpdate_old()
 				--end
 				--print("UPDATE")
+				if QuestFrame:IsVisible() then
 				if qf_doprog2 == 1 then
 					qf_prog2 = qf_prog2 + arg
 					if qf_prog2 > 1 then
@@ -245,6 +246,7 @@ local fupd = function(self, arg)
 					end
 					
 					--end
+				end
 				end
 			end
 frame:SetScript("OnEvent", function(self, event, ...)
@@ -336,6 +338,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		end
 		config_frame:Hide()
 		config_frame:SetBackgroundColor(0, 0, 0, 0.5)
+		--[[
 		local qtboc = QuestTitleButton_OnClick
 		if qtboc == nil then
 			print("Internal Quest Text Error")
@@ -344,7 +347,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				--print("CLICK", slef:GetID())
 				return qtboc(self)
 			end
-		end
+		end]]
 		local saq = SelectAvailableQuest
 		if saq == nil then
 			print("Internal Quest Text Error Native")
@@ -393,7 +396,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				return sgac(index)
 			end
 		end
-		local sgo = SelectGossipOption
+		--[[local sgo = SelectGossipOption
 		if sgo ==  nil then
 			print("Internal Quest Text Error NAtive")
 		else
@@ -404,9 +407,13 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				GetCurrentMode()
 				return sgo(index)
 			end
-		end
+		end]]
 		--InjectPrint("CloseGossip")
 			--print("TEST")
+			
+			
+			
+			
 		local qisdt = QUEST_TEMPLATE_DETAIL.elements[4]
 		if qisdt == nil then
 			print("Internal Quest Text Error")
@@ -454,6 +461,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 			--end
 			--QUEST_TEMPLATE_DETAIL.elements[10] = QuestInfo_ShowObjectivesText
 		end
+		
 		local OnUpdate_old = QuestInfoFrame:GetScript("OnUpdate")
 			frame:SetScript("OnUpdate", fupd)
 		local OnHide_old = QuestInfoFrame:GetScript("OnHide")
@@ -464,6 +472,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				qf_doprog = 0
 				qf_prog = 0
 			end)
+			
 	end
 end)
 
