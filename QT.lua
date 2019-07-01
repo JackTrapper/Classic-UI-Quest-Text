@@ -4,6 +4,8 @@ frame:RegisterEvent("QUEST_DETAIL")
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("QUEST_PROGRESS")
 frame:RegisterEvent("QUEST_COMPLETE")
+frame:RegisterEvent("QUEST_GREETING")
+frame:RegisterEvent("GOSSIP_SHOW")
 local qf_prog = 0
 local qf_width = 0
 local qf_doprog
@@ -12,6 +14,173 @@ local qf_prog2 = 1
 local qf_doprog2 = 0
 local qf_done = 1
 local sounds = {"Sound/Interface/WriteQuestA.ogg", "Sound/Interface/WriteQuestB.ogg", "Sound/Interface/WriteQuestC.ogg"}
+local currentqid = 0
+local currentqm = 0
+local current_mode = 0
+local config_frame = CreateFrame("FRAME")
+
+config_frame.texture = config_frame:CreateTexture()
+config_frame.texture:SetAllPoints(config_frame)
+config_frame.texture:SetTexture(0, 0, 0, 0.5)
+config_frame.SetBackgroundColor = function(...) end
+
+config_frame:SetPoint("CENTER", UIParent, "CENTER")
+config_frame:SetSize(180, 80)
+config_frame.text0 = CreateFrame("SIMPLEHTML", nil, config_frame)
+config_frame.text0:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 0, 0)
+config_frame.text0:SetSize(100, 10)
+config_frame.text0:SetFont("Fonts\\FRIZQT__.TTF", 8)
+config_frame.text0:SetText("Quest text fading mode")
+
+config_frame["btn" .. 0] = CreateFrame("BUTTON", nil, config_frame)
+config_frame["btn" .. 0]:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 142, 0)
+config_frame["btn0"]:SetText("X")
+config_frame.btn0:SetScript("OnClick", function(...)
+	config_frame:Hide()
+end)
+config_frame["btn" .. 0]:SetSize(58, 19)
+config_frame["font" .. 0] = CreateFont("QuestTextButtonFont" .. 0)
+config_frame["font" .. 0]:SetFont("\Fonts\\FRIZQT__.TTF", 8, "OUTLINE")
+--config_frame["font" .. i]:CopyFontObject("GameFontNormal")
+config_frame["btn" .. 0]:SetNormalFontObject("QuestTextButtonFont" .. 0)
+
+config_frame.text1 = CreateFrame("SIMPLEHTML", nil, config_frame)
+config_frame.text1:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 0, -10)
+config_frame.text1:SetSize(58, 10)
+config_frame.text1:SetFont("Fonts\\FRIZQT__.TTF", 8)
+config_frame.text1:SetText("Legendary")
+
+config_frame.text2 = CreateFrame("SIMPLEHTML", nil, config_frame)
+config_frame.text2:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 60, -10)
+config_frame.text2:SetSize(58, 10)
+config_frame.text2:SetFont("Fonts\\FRIZQT__.TTF", 8)
+config_frame.text2:SetText("Normal")
+
+config_frame.text3 = CreateFrame("SIMPLEHTML", nil, config_frame)
+config_frame.text3:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 120, -10)
+config_frame.text3:SetSize(58, 10)
+config_frame.text3:SetFont("Fonts\\FRIZQT__.TTF", 8)
+config_frame.text3:SetText("Repeatable")
+for i = 1, 9 do
+	config_frame["btn" .. i] = CreateFrame("BUTTON", nil, config_frame)
+	config_frame["btn" .. i]:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 60 * ((i-1) - ((i-1) % 3)) / 3, -20 * ((i-1) % 3 + 1))
+	config_frame["btn" .. i]:SetSize(58, 19)
+	config_frame["font" .. i] = CreateFont("QuestTextButtonFont" .. i)
+	config_frame["font" .. i]:SetFont("\Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+	--config_frame["font" .. i]:CopyFontObject("GameFontNormal")
+	config_frame["btn" .. i]:SetNormalFontObject("QuestTextButtonFont" .. i)
+	config_frame["btn" .. i]:SetHighlightFontObject("QuestTextButtonFont" .. i)
+	local btnid = i
+	config_frame["btn" .. i].SetTextColor = function(self, r, g, b, a)
+		local font = config_frame["font" .. btnid]
+		font:SetTextColor(r, g, b, a)
+		self:SetNormalFontObject(font)
+	end
+	local btnmode
+	local btngroup
+	if i % 3 == 1 then
+		btnmode = 0
+		config_frame["btn" .. i]:SetText("Instant")
+	elseif i % 3 == 2 then
+		btnmode = 2
+		config_frame["btn" .. i]:SetText("Fading")
+	elseif i % 3 == 0 then
+		btnmode = 1
+		config_frame["btn" .. i]:SetText("Scrolling")
+	end
+	config_frame["btn" .. i]:SetTextColor(1, 1, 1, 1)
+	if (((i-1) - ((i-1) % 3)) / 3) == 0 then
+		btngroup = "legendary"
+	elseif (((i-1) - ((i-1) % 3)) / 3) == 1 then
+		btngroup = "normal"
+	else
+		btngroup = "daily"
+	end
+	config_frame["btn" .. i]:SetScript("OnClick", function(self)
+		for i = (((btnid - 1) - ((btnid - 1) % 3)) / 3 + 1) * 3 - 2, (((btnid - 1) - ((btnid - 1) % 3)) / 3 + 1) * 3 do
+			if i ~= btnid then
+			config_frame["btn" .. i]:SetTextColor(1, 1, 1, 1)
+			end
+		end
+		self:SetTextColor(1, 0.8, 0, 1)
+		glob_sqt[btngroup].mode = btnmode
+	end)
+end
+		
+			
+	
+local GetCurrentMode = function()
+	--print("GETMODE")
+	if currentqid == -2 then
+		current_mode = glob_sqt.daily.mode
+		return
+	elseif currentqid == -3 then
+		current_mode = glob_sqt.normal.mode
+		return
+	end
+		
+	if currentqm == -1 then
+		if GetNumAvailableQuests() > 0 then
+			currentqm = 0
+		elseif GetNumActiveQuests() > 0 then
+			currentqm = 1
+		else
+			return
+		end
+	end
+	local index = currentqid
+	local questNum = GetNumAvailableQuests()
+	local isTrivial, frequency, isRepeatable, isLegendary
+	if currentqm == 0 then
+		isTrivial, frequency, isRepeatable, isLegendary = GetAvailableQuestInfo(currentqid)
+	elseif currentqm == 1 then
+		isTrivial, frequency, isRepeatable, isLegendary = GetAvailableQuestInfo(questNum + currentqid)
+	elseif currentqm == 3 then
+		local qs = {GetGossipActiveQuests()}
+		isTrivial = qs[(index-1) * 5 + 3]
+		frequency = glob_sqt.repeatable[qs[(index-1) * 5 + 1]]
+		--isRepeatable = qs[(index-1) * 5 + 1]
+		isLegendary = qs[(index-1) * 5 + 5]
+		if frequency ~= 1 then
+			isRepeatable = true
+		end
+		if frequency == 1 then
+			isRepeatable = false
+		end
+		if frequency == nil then
+			frequency = 1
+			isRepeatable = false
+		end
+	elseif currentqm == 2 then
+		local qs = {GetGossipAvailableQuests()}
+		isTrivial = qs[(index-1) * 5 + 3]
+		frequency = qs[(index-1) * 5 + 4]
+		isRepeatable = qs[(index-1) * 5 + 5]
+		isLegendary = qs[(index-1) * 5 + 6]
+		glob_sqt.repeatable[qs[(index-1) * 5 + 1]] = frequency
+	end
+	if isLegendary then
+		current_mode = glob_sqt.legendary.mode
+	else
+		if isRepeatable or frequency ~= 1 then
+			current_mode = glob_sqt.daily.mode
+		else
+			current_mode = glob_sqt.normal.mode
+		end
+	end
+	current_mode_w = 1
+end
+
+InjectPrint = function(name)
+	local n = name
+	local oldf = _G[name]
+	local injf = function(...)
+		print(n, ...)
+		return oldf(...)
+	end
+	_G[name] = injf
+end
+		
 local fupd = function(self, arg)
 				--if OnUpdate_old ~= nil then
 				--	OnUpdate_old()
@@ -49,8 +218,11 @@ local fupd = function(self, arg)
 				QuestProgressItem4:SetAlpha(qf_prog2)
 				QuestProgressItem5:SetAlpha(qf_prog2)
 				QuestProgressItem6:SetAlpha(qf_prog2)
-				if qf_done == 1 then
+				if qf_done == 1 or current_mode == 2 then
 				QuestInfoTitleHeader:SetAlpha(qf_prog2)
+				end
+				if current_mode == 2 then
+					QuestInfoDescriptionText:SetAlpha(qf_prog2)
 				end
 				if qf_doprog == 1 then
 					qf_prog = qf_prog + arg
@@ -75,11 +247,39 @@ local fupd = function(self, arg)
 			end
 frame:SetScript("OnEvent", function(self, event, ...)
 	if event == "QUEST_DETAIL" then
+		if current_mode_w == nil then
+			if QuestIsDaily() or QuestIsWeekly() then
+				currentqid = -2
+			else
+				currentqid = -3
+			end
+			GetCurrentMode()
+		end
+		--print("detail")
+		current_mode_w = nil
 		--if QuestInfoFrame:IsVisible() then
-			
-			qf_prog = 0
-			qf_doprog = 1
+				--print(current_mode)
+				--print("EVENT FIRED")
+				qf_prog = 0
+				qf_prog2 = 0
+				qf_done = 0
+				if current_mode == 1 then
+				qf_prog_old = -2
+				qf_doprog2 = 0
+				qf_doprog = 1
+				else
+					if current_mode == 0 then
+					else
+						if current_mode == 2 then
+							qf_doprog2 = 1
+							qf_doprog = 0
+						end
+					end
+				end
 		--end
+	end
+	if event == "QUEST_GREETING" or event == "GOSSIP_SHOW" then
+		--print("Greeting")
 	end
 	if event == "QUEST_PROGRESS" or event == "QUEST_COMPLETE" then
 		qf_prog2 = 0
@@ -87,6 +287,121 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		qf_done = 1
 	end
 	if event == "ADDON_LOADED" and ... == "QuestText" then
+		if glob_sqt == nil then
+			glob_sqt = {}
+		end
+		if glob_sqt.cps ~= nil then
+			QUEST_DESCRIPTION_GRADIENT_CPS = glob_sqt.cps
+		end
+		if glob_sqt.len ~= nil then
+			QUEST_DESCRIPTION_GRADIENT_LENGTH = glob_sqt.len
+		end
+		if glob_sqt.legendary == nil then
+			glob_sqt.legendary = { mode = 1 }
+		end
+		if glob_sqt.normal == nil then
+			glob_sqt.normal = { mode = 1 }
+		end
+		if glob_sqt.daily == nil then
+			glob_sqt.daily = { mode = 2 }
+		end
+		if glob_sqt.repeatable == nil then
+			glob_sqt.repeatable = {}
+		end
+		if glob_sqt.legendary.mode == 0 then
+			config_frame.btn1:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.legendary.mode == 1 then
+			config_frame.btn3:SetTextColor(1, 0.8, 0, 1)
+		else
+			config_frame.btn2:SetTextColor(1, 0.8, 0, 1)
+		end
+		if glob_sqt.normal.mode == 0 then
+			config_frame.btn4:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.normal.mode == 1 then
+			config_frame.btn6:SetTextColor(1, 0.8, 0, 1)
+		else
+			config_frame.btn5:SetTextColor(1, 0.8, 0, 1)
+		end
+		if glob_sqt.daily.mode == 0 then
+			config_frame.btn7:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.daily.mode == 1 then
+			config_frame.btn9:SetTextColor(1, 0.8, 0, 1)
+		else
+			config_frame.btn8:SetTextColor(1, 0.8, 0, 1)
+		end
+		config_frame:Hide()
+		config_frame:SetBackgroundColor(0, 0, 0, 0.5)
+		local qtboc = QuestTitleButton_OnClick
+		if qtboc == nil then
+			print("Internal Quest Text Error")
+		else
+			QuestTitleButton_OnClick = function(self)
+				--print("CLICK", slef:GetID())
+				return qtboc(self)
+			end
+		end
+		local saq = SelectAvailableQuest
+		if saq == nil then
+			print("Internal Quest Text Error Native")
+		else
+			SelectAvailableQuest = function(index)
+				--print("AVAILABLE", index)
+				currentqid = index
+				currentqm = 0
+				GetCurrentMode()
+				return saq(index)
+			end
+		end
+		local sac = SelectActiveQuest
+		if sac == nil then
+			print("Internal Quest Text Error Native")
+		else
+			SelectActiveQuest = function(index)
+				--print("ACTIVE", index)
+				currentqid = index
+				currentqm = 1
+				GetCurrentMode()
+				return sac(index)
+			end
+		end
+		local sgaq = SelectGossipAvailableQuest
+		if sgaq ==  nil then
+			print("Internal Quest Text Error NAtive")
+		else
+			SelectGossipAvailableQuest = function(index)
+				--print("GAVAILABLE", index)
+				currentqid = index
+				currentqm = 2
+				GetCurrentMode()
+				return sgaq(index)
+			end
+		end
+		local sgac = SelectGossipActiveQuest
+		if sgac ==  nil then
+			print("Internal Quest Text Error NAtive")
+		else
+			SelectGossipActiveQuest = function(index)
+				--print("GAVAILABLE", index)
+				currentqid = index
+				currentqm = 3
+				GetCurrentMode()
+				return sgac(index)
+			end
+		end
+		local sgo = SelectGossipOption
+		if sgo ==  nil then
+			print("Internal Quest Text Error NAtive")
+		else
+			SelectGossipOption = function(index)
+				--print("GOSSIP", index)
+				currentqid = 1
+				currentqm = -1
+				GetCurrentMode()
+				return sgo(index)
+			end
+		end
+		--InjectPrint("CloseGossip")
+			--print("TEST")
 		local qisdt = QUEST_TEMPLATE_DETAIL.elements[4]
 		if qisdt == nil then
 			print("Internal Quest Text Error")
@@ -95,11 +410,25 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				
 				--frame:GetScript("OnEvent")(frame, "QUEST_DETAIL")
 			--	print("SHOWN")
+				--print("SHOWN")
+				qf_prog = 0
+				qf_prog2 = 0
+				qf_done = 0
+				if current_mode == 1 then
 				qf_prog = 0
 				qf_prog_old = -2
 				qf_doprog = 1
 				qf_prog2 = 0
 				qf_done = 0
+				else
+					if current_mode == 0 then
+					else
+						if current_mode == 2 then
+							qf_doprog2 = 1
+							qf_doprog = 0
+						end
+					end
+				end
 				--frame:SetScript("OnUpdate", fupd)
 				return qisdt(contentWidth)
 			end
@@ -130,3 +459,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
 			end)
 	end
 end)
+
+SLASH_SQT1, SLASH_SQT2, SLASH_SQT3 = "/sqt", "/questtext", "/scrollingquesttext"
+SlashCmdList.SQT = function(...)
+	if config_frame:IsVisible() then
+		config_frame:Hide()
+	else
+		config_frame:Show()
+	end
+end
