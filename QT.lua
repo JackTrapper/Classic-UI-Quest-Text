@@ -21,7 +21,7 @@ local config_frame = CreateFrame("FRAME")
 
 config_frame.texture = config_frame:CreateTexture()
 config_frame.texture:SetAllPoints(config_frame)
-config_frame.texture:SetTexture(0, 0, 0, 0.5)
+config_frame.texture:SetColorTexture(0, 0, 0, 0.5)
 config_frame.SetBackgroundColor = function(...) end
 
 config_frame:SetPoint("CENTER", UIParent, "CENTER")
