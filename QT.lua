@@ -13,7 +13,11 @@ local qf_prog_old = 0
 local qf_prog2 = 1
 local qf_doprog2 = 0
 local qf_done = 1
-local sounds = {"Sound/Interface/WriteQuestA.ogg", "Sound/Interface/WriteQuestB.ogg", "Sound/Interface/WriteQuestC.ogg"}
+local sounds = {
+	567445, --"Sound/Interface/WriteQuestA.ogg", 
+	567503, --"Sound/Interface/WriteQuestB.ogg", 
+	567396, --"Sound/Interface/WriteQuestC.ogg"
+}
 local currentqid = 0
 local currentqm = 0
 local current_mode = 0

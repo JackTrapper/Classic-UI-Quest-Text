@@ -1,7 +1,7 @@
-## Interface: 80000
+## Interface: 80200
 ## Title: ClassicUI Quest Text
 ## Notes: Enables the scrolling quest text available in previous versions of the game.
-## Version: 1.2
+## Version: 8.2.0.3
 ## Author: Ikechi
 ## SavedVariables: glob_sqt CUI_qt
 
