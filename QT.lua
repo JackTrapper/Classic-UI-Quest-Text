@@ -325,13 +325,13 @@ frame:SetScript("OnEvent", function(self, event, ...)
 			QUEST_DESCRIPTION_GRADIENT_LENGTH = glob_sqt.len
 		end
 		if glob_sqt.legendary == nil then
-			glob_sqt.legendary = { mode = 1 }
+			glob_sqt.legendary = { mode = 3 }
 		end
 		if glob_sqt.normal == nil then
-			glob_sqt.normal = { mode = 1 }
+			glob_sqt.normal = { mode = 3 }
 		end
 		if glob_sqt.daily == nil then
-			glob_sqt.daily = { mode = 2 }
+			glob_sqt.daily = { mode = 3 }
 		end
 		if glob_sqt.repeatable == nil or glob_sqt.configver ~= 1 then
 			glob_sqt.repeatable = {}
@@ -364,7 +364,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		else
 			config_frame.btn10:SetTextColor(1, 0.8, 0, 1)
 		end
-		if glob_sqt.help == nil then
+		--[[if glob_sqt.help == nil then
 			StaticPopupDialogs["QUESTTEXT_HELP"] = {
 				text = "Scrolling Quest Text\n\nRight-click the quest text box for any quest to configure this AddOn\n\nYou can always skip the scrolling text by left-clicking it.",
 				button1 = "Ok",
@@ -377,12 +377,16 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				preferredIndex = 3
 			}
 			StaticPopup_Show("QUESTTEXT_HELP")
+		end]]
+		if CUI_qt == nil then
+			CUI_qt = { lv = 0 }
 		end
+		ClassicUIUpdateCheck()
 		QuestFrame:HookScript("OnMouseDown", function(self, ...)
 			qf_prog = qf_width
-			if ... == "RightButton" then
+			--[[if ... == "RightButton" then
 				config_frame:Show()
-			end
+			end]]
 		end)
 		QuestFrameAcceptButton:HookScript("OnMouseDown", function(self, ...)
 			qf_prog = qf_width
@@ -557,6 +561,6 @@ SlashCmdList.SQT = function(...)
 	elseif ... == "shownow" then
 		qf_prog = qf_width
 	else
-		print("Use |cffffff00/sqt config|r to open the configuration or |cffffff00/sqt shownow|r to show all the quest details now (you can add it to a macro).")
+		print("Use |cffffff00/sqt config|r to open the configuration.")
 	end
 end
