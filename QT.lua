@@ -269,6 +269,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				qf_doprog = 1
 				else
 					if current_mode == 0 then
+					qf_prog = 1
+					qf_prog2 = 1
 					else
 						if current_mode == 2 then
 							qf_doprog2 = 1
@@ -422,6 +424,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				qf_done = 0
 				else
 					if current_mode == 0 then
+					qf_prog = 1
+					qf_prog2 = 1
 					else
 						if current_mode == 2 then
 							qf_doprog2 = 1
