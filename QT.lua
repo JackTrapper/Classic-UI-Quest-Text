@@ -24,17 +24,18 @@ config_frame.texture:SetAllPoints(config_frame)
 config_frame.texture:SetColorTexture(0, 0, 0, 0.5)
 config_frame.SetBackgroundColor = function(...) end
 
-config_frame:SetPoint("CENTER", UIParent, "CENTER")
+config_frame:SetPoint("CENTER", QuestFrame, "CENTER")
 config_frame:SetSize(180, 80)
+config_frame:SetFrameStrata("DIALOG")
 config_frame.text0 = CreateFrame("SIMPLEHTML", nil, config_frame)
-config_frame.text0:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 0, 0)
+config_frame.text0:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 4, -6)
 config_frame.text0:SetSize(100, 10)
 config_frame.text0:SetFont("Fonts\\FRIZQT__.TTF", 8)
 config_frame.text0:SetText("Quest text fading mode")
 
 config_frame["btn" .. 0] = CreateFrame("BUTTON", nil, config_frame)
 config_frame["btn" .. 0]:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 142, 0)
-config_frame["btn0"]:SetText("X")
+config_frame["btn0"]:SetText("|cffff0000X|r")
 config_frame.btn0:SetScript("OnClick", function(...)
 	config_frame:Hide()
 end)
@@ -45,25 +46,25 @@ config_frame["font" .. 0]:SetFont("\Fonts\\FRIZQT__.TTF", 8, "OUTLINE")
 config_frame["btn" .. 0]:SetNormalFontObject("QuestTextButtonFont" .. 0)
 
 config_frame.text1 = CreateFrame("SIMPLEHTML", nil, config_frame)
-config_frame.text1:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 0, -10)
+config_frame.text1:SetPoint("TOPLEFT", config_frame.text0, "TOPLEFT", -4, -14)
 config_frame.text1:SetSize(58, 10)
 config_frame.text1:SetFont("Fonts\\FRIZQT__.TTF", 8)
 config_frame.text1:SetText("Legendary")
 
 config_frame.text2 = CreateFrame("SIMPLEHTML", nil, config_frame)
-config_frame.text2:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 60, -10)
+config_frame.text2:SetPoint("TOPLEFT", config_frame.text0, "TOPLEFT", 56, -14)
 config_frame.text2:SetSize(58, 10)
 config_frame.text2:SetFont("Fonts\\FRIZQT__.TTF", 8)
 config_frame.text2:SetText("Normal")
 
 config_frame.text3 = CreateFrame("SIMPLEHTML", nil, config_frame)
-config_frame.text3:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 120, -10)
+config_frame.text3:SetPoint("TOPLEFT", config_frame.text0, "TOPLEFT", 116, -14)
 config_frame.text3:SetSize(58, 10)
 config_frame.text3:SetFont("Fonts\\FRIZQT__.TTF", 8)
 config_frame.text3:SetText("Repeatable")
-for i = 1, 9 do
+for i = 1, 12 do
 	config_frame["btn" .. i] = CreateFrame("BUTTON", nil, config_frame)
-	config_frame["btn" .. i]:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 60 * ((i-1) - ((i-1) % 3)) / 3, -20 * ((i-1) % 3 + 1))
+	config_frame["btn" .. i]:SetPoint("TOPLEFT", config_frame, "TOPLEFT", 60 * ((i-1) - ((i-1) % 4)) / 4,  -12 * ((i-1) % 4 + 1) - 13)
 	config_frame["btn" .. i]:SetSize(58, 19)
 	config_frame["font" .. i] = CreateFont("QuestTextButtonFont" .. i)
 	config_frame["font" .. i]:SetFont("\Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
@@ -78,26 +79,29 @@ for i = 1, 9 do
 	end
 	local btnmode
 	local btngroup
-	if i % 3 == 1 then
+	if i % 4 == 1 then
 		btnmode = 0
 		config_frame["btn" .. i]:SetText("Instant")
-	elseif i % 3 == 2 then
+	elseif i % 4 == 2 then
 		btnmode = 2
 		config_frame["btn" .. i]:SetText("Fading")
-	elseif i % 3 == 0 then
+	elseif i % 4 == 3 then
 		btnmode = 1
 		config_frame["btn" .. i]:SetText("Scrolling")
+	elseif i % 4 == 0 then
+		btnmode = 3
+		config_frame["btn" .. i]:SetText("Immersive")
 	end
 	config_frame["btn" .. i]:SetTextColor(1, 1, 1, 1)
-	if (((i-1) - ((i-1) % 3)) / 3) == 0 then
+	if (((i-1) - ((i-1) % 4)) / 4) == 0 then
 		btngroup = "legendary"
-	elseif (((i-1) - ((i-1) % 3)) / 3) == 1 then
+	elseif (((i-1) - ((i-1) % 4)) / 4) == 1 then
 		btngroup = "normal"
 	else
 		btngroup = "daily"
 	end
 	config_frame["btn" .. i]:SetScript("OnClick", function(self)
-		for i = (((btnid - 1) - ((btnid - 1) % 3)) / 3 + 1) * 3 - 2, (((btnid - 1) - ((btnid - 1) % 3)) / 3 + 1) * 3 do
+		for i = (((btnid - 1) - ((btnid - 1) % 4)) / 4 + 1) * 4 - 3, (((btnid - 1) - ((btnid - 1) % 4)) / 4 + 1) * 4 do
 			if i ~= btnid then
 			config_frame["btn" .. i]:SetTextColor(1, 1, 1, 1)
 			end
@@ -226,6 +230,7 @@ local fupd = function(self, arg)
 				end
 				if current_mode == 2 then
 					QuestInfoDescriptionText:SetAlpha(qf_prog2)
+					
 				end
 				if qf_doprog == 1 then
 					qf_prog = qf_prog + arg
@@ -242,6 +247,7 @@ local fupd = function(self, arg)
 						qf_prog = 0
 						qf_prog2 = 0
 						qf_doprog2 = 1
+						QuestFrameAcceptButton:Enable()
 						--self:SetScript("OnUpdate", nil)
 					end
 					
@@ -267,18 +273,27 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				qf_prog = 0
 				qf_prog2 = 0
 				qf_done = 0
-				if current_mode == 1 then
+				if current_mode == 1 or current_mode == 3 then
 				qf_prog_old = -2
 				qf_doprog2 = 0
 				qf_doprog = 1
+				if current_mode == 3 then
+					QuestFrameAcceptButton:Disable()
+				else
+					QuestFrameAcceptButton:Enable()
+				end
 				else
 					if current_mode == 0 then
 					qf_prog = 1
 					qf_prog2 = 1
+					qf_prog = qf_width
+					QuestFrameAcceptButton:Enable()
 					else
 						if current_mode == 2 then
+							qf_prog = qf_width
 							qf_doprog2 = 1
 							qf_doprog = 0
+							QuestFrameAcceptButton:Enable()
 						end
 					end
 				end
@@ -319,23 +334,52 @@ frame:SetScript("OnEvent", function(self, event, ...)
 			config_frame.btn1:SetTextColor(1, 0.8, 0, 1)
 		elseif glob_sqt.legendary.mode == 1 then
 			config_frame.btn3:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.legendary.mode == 3 then
+			config_frame.btn4:SetTextColor(1, 0.8, 0, 1)
 		else
 			config_frame.btn2:SetTextColor(1, 0.8, 0, 1)
 		end
 		if glob_sqt.normal.mode == 0 then
-			config_frame.btn4:SetTextColor(1, 0.8, 0, 1)
-		elseif glob_sqt.normal.mode == 1 then
-			config_frame.btn6:SetTextColor(1, 0.8, 0, 1)
-		else
 			config_frame.btn5:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.normal.mode == 1 then
+			config_frame.btn7:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.normal.mode == 3 then
+			config_frame.btn8:SetTextColor(1, 0.8, 0, 1)
+		else
+			config_frame.btn6:SetTextColor(1, 0.8, 0, 1)
 		end
 		if glob_sqt.daily.mode == 0 then
-			config_frame.btn7:SetTextColor(1, 0.8, 0, 1)
-		elseif glob_sqt.daily.mode == 1 then
 			config_frame.btn9:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.daily.mode == 1 then
+			config_frame.btn11:SetTextColor(1, 0.8, 0, 1)
+		elseif glob_sqt.daily.mode == 3 then
+			config_frame.btn12:SetTextColor(1, 0.8, 0, 1)
 		else
-			config_frame.btn8:SetTextColor(1, 0.8, 0, 1)
+			config_frame.btn10:SetTextColor(1, 0.8, 0, 1)
 		end
+		if glob_sqt.help == nil then
+			StaticPopupDialogs["QUESTTEXT_HELP"] = {
+				text = "Scrolling Quest Text\n\nRight-click the quest text box for any quest to configure this AddOn\n\nYou can always skip the scrolling text by left-clicking it.",
+				button1 = "Ok",
+				OnAccept = function()
+					glob_sqt.help = 1
+				end,
+				timeout = 0,
+				whileDead = true,
+				hideOnEscape = false,
+				preferredIndex = 3
+			}
+			StaticPopup_Show("QUESTTEXT_HELP")
+		end
+		QuestFrame:HookScript("OnMouseDown", function(self, ...)
+			qf_prog = qf_width
+			if ... == "RightButton" then
+				config_frame:Show()
+			end
+		end)
+		QuestFrameAcceptButton:HookScript("OnMouseDown", function(self, ...)
+			qf_prog = qf_width
+		end)
 		config_frame:Hide()
 		config_frame:SetBackgroundColor(0, 0, 0, 0.5)
 		--[[
@@ -426,7 +470,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				qf_prog = 0
 				qf_prog2 = 0
 				qf_done = 0
-				if current_mode == 1 then
+				if current_mode == 1 or current_mode == 3 then
 				qf_prog = 0
 				qf_prog_old = -2
 				qf_doprog = 1
