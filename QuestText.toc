@@ -1,7 +1,7 @@
-## Interface: 70300
+## Interface: 80000
 ## Title: Scrolling Quest Text
 ## Notes: Enables the scrolling quest text available in previous versions of the game.
-## Version: 1.0
+## Version: 1.1
 ## Author: Ikechi
 ## SavedVariables: glob_sqt
 

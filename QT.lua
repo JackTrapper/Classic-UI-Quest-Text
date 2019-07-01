@@ -308,6 +308,13 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		qf_done = 1
 	end
 	if event == "ADDON_LOADED" and ... == "QuestText" then
+		WorldMapFrame:HookScript("OnShow", function()
+			qf_prog = 100000
+			qf_doprog2 = 1
+			qf_doprog = 0
+			qf_prog2 = 1
+			QuestInfoDescriptionText:SetAlphaGradient(qf_prog * QUEST_DESCRIPTION_GRADIENT_CPS, QUEST_DESCRIPTION_GRADIENT_LENGTH)
+		end)
 		if glob_sqt == nil then
 			glob_sqt = {}
 		end
@@ -515,6 +522,25 @@ frame:SetScript("OnEvent", function(self, event, ...)
 				end
 				qf_doprog = 0
 				qf_prog = 0
+				QuestInfoObjectivesText:SetAlpha(1)
+				QuestInfoRewardText:SetAlpha(1)
+				QuestInfoRequiredMoneyText:SetAlpha(1)
+				QuestInfoGroupSize:SetAlpha(1)
+				QuestInfoAnchor:SetAlpha(1)
+				QuestInfoDescriptionHeader:SetAlpha(1)
+				QuestInfoObjectivesHeader:SetAlpha(1)
+				QuestInfoRewardsFrame:SetAlpha(1)
+				QuestProgressTitleText:SetAlpha(1)
+				QuestProgressText:SetAlpha(1)
+				QuestProgressRequiredItemsText:SetAlpha(1)
+				QuestProgressRequiredMoneyText:SetAlpha(1)
+				QuestProgressRequiredMoneyFrame:SetAlpha(1)
+				QuestProgressItem1:SetAlpha(1)
+				QuestProgressItem2:SetAlpha(1)
+				QuestProgressItem3:SetAlpha(1)
+				QuestProgressItem4:SetAlpha(1)
+				QuestProgressItem5:SetAlpha(1)
+				QuestProgressItem6:SetAlpha(1)
 			end)
 			
 	end
