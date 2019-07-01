@@ -478,9 +478,15 @@ end)
 
 SLASH_SQT1, SLASH_SQT2, SLASH_SQT3 = "/sqt", "/questtext", "/scrollingquesttext"
 SlashCmdList.SQT = function(...)
-	if config_frame:IsVisible() then
-		config_frame:Hide()
+	if ... == "config" then
+		if config_frame:IsVisible() then
+			config_frame:Hide()
+		else
+			config_frame:Show()
+		end
+	elseif ... == "shownow" then
+		qf_prog = qf_width
 	else
-		config_frame:Show()
+		print("Use |cffffff00/sqt config|r to open the configuration or |cffffff00/sqt shownow|r to show all the quest details now (you can add it to a macro).")
 	end
 end
